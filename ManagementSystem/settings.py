@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'StudentApp',
     'rest_framework',
     'phonenumber_field',
+    'django_countries'
     
 ]
 
