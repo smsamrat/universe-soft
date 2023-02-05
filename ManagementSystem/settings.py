@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'StudentApp',
+    'UserApp',
     'rest_framework',
     
 ]
+
+AUTH_USER_MODEL = "UserApp.User"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,6 +56,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ManagementSystem.urls'
+
 
 TEMPLATES = [
     {
