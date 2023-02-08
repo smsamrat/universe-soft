@@ -1,6 +1,11 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django_countries.fields import CountryField
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 # Create your models here.
@@ -25,24 +30,7 @@ class Course(models.Model):
 """Teacher Section"""
 ##################################################################################
 
-
 class Teacher(models.Model):
-    first_name = models.CharField(max_length=120)
-    last_name = models.CharField(max_length=120)
-    email = models.EmailField()
-    phone = PhoneNumberField()
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Teachers"
-        ordering = ["-id"]
-    
-    def __str__(self):
-        return self.name
-
-
-class TeacherProfile(models.Model):
     GENDER_CHOICE = (
         ('M', 'Male'),
         ('F', 'Female'),
@@ -58,7 +46,8 @@ class TeacherProfile(models.Model):
         ('AB+', 'AB(+ve)'),
         ('AB-', 'AB(-ve)')
     )
-    # teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
+    teacher = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="teacher_profile")
+    name = models.CharField(max_length=120)
     address = models.CharField(max_length=120)
     designation = models.CharField(max_length=120)
     education = models.CharField(max_length=255)
@@ -69,15 +58,13 @@ class TeacherProfile(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
     
-
-
     class Meta:
-        verbose_name_plural = "TeacherProfiles"
+        verbose_name_plural = "Teacher"
         ordering = ["-id"]
     
 
     def __str__(self):
-        return self.teacher.name
+        return self.name
 
 
 
@@ -123,39 +110,17 @@ class ClassRoutine(models.Model):
 ##################################################################################
    
 class Student(models.Model):
-    first_name = models.CharField(max_length=120)
-    last_name = models.CharField(max_length=120)
-    phone = PhoneNumberField()
-    email = models.EmailField(unique=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    course_type = models.CharField(max_length=120)
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=120)
-    transaction_id = models.CharField(max_length=120)
-    course_fee = models.IntegerField()
-    discount = models.IntegerField()
-    net_fee = models.IntegerField()
-    paid_amount = models.IntegerField()
-    due_amount = models.IntegerField()
-    reference_by = models.CharField(max_length=120)
-    password1 = models.CharField(max_length=120)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Students"
-        ordering = ["-id"]
-    
-    def __str__(self):
-        return self.name
-
-
-class StudentProfile(models.Model):
-    GENDER_CHOICE = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('C', 'Custom')
-    )
+    # PAYMENT_CHOICE = (
+    #     ('Cash', 'Cash'),
+    #     ('Bkash', 'Bkash'),
+    #     ('Nagad', 'Nagad'),
+    #     ('Rocket', 'Rocket')
+    # )
+    # GENDER_CHOICE = (
+    #     ('M', 'Male'),
+    #     ('F', 'Female'),
+    #     ('C', 'Custom')
+    # )
     BLOOD_GROUP_CHOICE = (
         ('A+', 'A(+ve)'),
         ('A-', 'A(-ve)'),
@@ -166,23 +131,80 @@ class StudentProfile(models.Model):
         ('AB+', 'AB(+ve)'),
         ('AB-', 'AB(-ve)')
     )
-    # student = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
-    address = models.CharField(max_length=120)
+    student = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="student_profile",null=True,blank=True)
+    # course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    # course_type = models.CharField(max_length=120)
+    # batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    # payment_method = models.CharField(max_length=50,choices=PAYMENT_CHOICE)
+    # transaction_id = models.CharField(max_length=120)
+    # course_fee = models.IntegerField()
+    # discount = models.IntegerField()
+    net_fee = models.IntegerField()
+    # paid_amount = models.IntegerField()
+    # due_amount = models.IntegerField()
+    # reference_by = models.CharField(max_length=120)
+    # address = models.CharField(max_length=120)
     image = models.ImageField(upload_to="student", blank=True, null=True)
-    blood_group = models.CharField(max_length=255, choices=BLOOD_GROUP_CHOICE)
-    gender = models.CharField(max_length=255, choices=GENDER_CHOICE)
-    occupation = models.CharField(max_length=120)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now_add=True)
-
+    blood_group = models.CharField(max_length=255,blank=True, null=True, choices=BLOOD_GROUP_CHOICE)
+    # gender = models.CharField(max_length=255, choices=GENDER_CHOICE)
+    # occupation = models.CharField(max_length=120)
+    # created = models.DateTimeField(auto_now_add=True)
+    # updated = models.DateTimeField(auto_now_add=True)
+    # created = models.DateTimeField(auto_now_add=True)
+    # updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name_plural = "StudentProfile"
+        verbose_name_plural = "Students"
         ordering = ["-id"]
     
+    
+    
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Student.objects.create(student=instance,net_fee=0,image='',blood_group='')
 
-    def __str__(self):
-        return self.student.name
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.student_profile.save()
+
+
+
+
+# class StudentProfile(models.Model):
+#     GENDER_CHOICE = (
+#         ('M', 'Male'),
+#         ('F', 'Female'),
+#         ('C', 'Custom')
+#     )
+#     BLOOD_GROUP_CHOICE = (
+#         ('A+', 'A(+ve)'),
+#         ('A-', 'A(-ve)'),
+#         ('B+', 'B(+ve)'),
+#         ('B-', 'B(-ve)'),
+#         ('O+', 'O(+ve)'),
+#         ('O-', 'O(-ve)'),
+#         ('AB+', 'AB(+ve)'),
+#         ('AB-', 'AB(-ve)')
+#     )
+#     # student = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
+#     address = models.CharField(max_length=120)
+#     image = models.ImageField(upload_to="student", blank=True, null=True)
+#     blood_group = models.CharField(max_length=255, choices=BLOOD_GROUP_CHOICE)
+#     gender = models.CharField(max_length=255, choices=GENDER_CHOICE)
+#     occupation = models.CharField(max_length=120)
+#     created = models.DateTimeField(auto_now_add=True)
+#     updated = models.DateTimeField(auto_now_add=True)
+
+
+#     class Meta:
+#         verbose_name_plural = "StudentProfile"
+#         ordering = ["-id"]
+    
+
+#     def __str__(self):
+#         return self.student.name
 
 
 ##################################################################################
@@ -346,5 +368,19 @@ class Transaction(models.Model):
 
 
 
+
+
+
+
+
+
+
+class UnivStudent(models.Model):
+    """
+    A class based model for storing the records of a university student
+    Note: A OneToOne relation is established for each student with User model.
+    """
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    subject_major = models.CharField(name="subject_major", max_length=60)
 
      
