@@ -1,84 +1,56 @@
 from rest_framework import serializers
 
-from StudentApp.models import UnivStudent
-
+from StudentApp.models import *
+from django.contrib.auth.hashers import make_password
+from django.conf import settings
 from django.contrib.auth import get_user_model
-User = get_user_model()
+from UserApp.models import User
 
 
-
-
-
-class UserSerializer(serializers.ModelSerializer):
+class StudentSerializers(serializers.ModelSerializer):
     class Meta:
-      model = User
-      fields = ('first_name','last_name','phone','email', 'password',)
-
-
-class StudentSerializer(serializers.ModelSerializer):
-    """
-    A student serializer to return the student details
-    """
-    user = UserSerializer(required=True)
+        model = Student
+        fields = '__all__'
+       
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    
+    student_profile = StudentSerializers(required=True)
+    password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
     class Meta:
-        model = UnivStudent
-        fields = ('user', 'subject_major',)
-        read_only_fields = ('user',)
-        
-
-    def create(self, validated_data):
-        """
-        Overriding the default create method of the Model serializer.
-        :param validated_data: data containing all the details of student
-        :return: returns a successfully created student record
-        """
-        user_data = validated_data.pop('user')
-        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
-        student, created = UnivStudent.objects.update_or_create(user=user,
-                            subject_major=validated_data.pop('subject_major'))
-        return student
+        model = User
+        fields=['first_name','last_name','phone','email', 'password', 'password2','student_profile']
+        extra_kwargs={
+        'password':{'write_only':True}
+        }
 
 
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password2 = attrs.get('password2')
+        if password != password2:
+            raise serializers.ValidationError("Password and Confirm Password doesn't match")
+        return attrs
 
-
-
-
-
-
-
-# class UserRegistrationSerializer(serializers.ModelSerializer):
-#   # We are writing this becoz we need confirm password field in our Registratin Request
-
-#   password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
-#   class Meta:
-#     model = User
-#     fields = ('first_name','last_name','phone','email', 'password',)
-#     extra_kwargs={
-#       'password':{'write_only':True}
-#     }
-
-
-
-# class StudentSerializer(serializers.ModelSerializer):
-#   user = UserRegistrationSerializer(required=True)
-#   class Meta:
-#     model = Student
-#     fields = ('user','net_fee','blood_group')
-#     # read_only_fields = ['student']
+    def create(self, validate_data):
+        user_student = validate_data.pop('student_profile')
+        user = User.objects.create(
+            first_name = validate_data['first_name'],
+            last_name = validate_data['last_name'],
+            phone = validate_data['phone'],
+            email = validate_data['email'],
+            password = validate_data['password'],
+        )
+        Student.objects.update_or_create(
+            student=user,
+            net_fee = user_student['net_fee']
+        )
+        return user
+    
     
 
-#   def create(self, validated_data):
-#       """
-#       Overriding the default create method of the Model serializer.
-#       :param validated_data: data containing all the details of student
-#       :return: returns a successfully created student record
-#       """
-#       user_data = validated_data.pop('user')
-#       user = UserRegistrationSerializer.create(UserRegistrationSerializer(), validated_data=user_data)
-#       print(user)
-#       students, created = Student.objects.update_or_create(subject_major=validated_data.pop('subject_major'))
-#       return students
-  
+
+
+
 
 
     

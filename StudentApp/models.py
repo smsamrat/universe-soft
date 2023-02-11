@@ -23,7 +23,7 @@ class Course(models.Model):
         ordering = ["-id"]
     
     def __str__(self):
-        return self.name
+        return self.name+" "+self.duration
 
 
 ##################################################################################
@@ -132,7 +132,7 @@ class Student(models.Model):
         ('AB-', 'AB(-ve)')
     )
     student = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="student_profile",null=True,blank=True)
-    # course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE,null=True)
     # course_type = models.CharField(max_length=120)
     # batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     # payment_method = models.CharField(max_length=50,choices=PAYMENT_CHOICE)
