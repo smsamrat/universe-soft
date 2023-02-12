@@ -132,7 +132,7 @@ class Student(models.Model):
         ('AB-', 'AB(-ve)')
     )
     student = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="student_profile",null=True,blank=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE,null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE,null=True,related_name="courseby")
     # course_type = models.CharField(max_length=120)
     # batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     # payment_method = models.CharField(max_length=50,choices=PAYMENT_CHOICE)
@@ -158,16 +158,7 @@ class Student(models.Model):
         ordering = ["-id"]
     
     
-    
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         Student.objects.create(student=instance,net_fee=0,image='',blood_group='')
 
-
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.student_profile.save()
 
 
 
@@ -365,22 +356,5 @@ class Transaction(models.Model):
     
     def __str__(self):
         return self.user
-
-
-
-
-
-
-
-
-
-
-class UnivStudent(models.Model):
-    """
-    A class based model for storing the records of a university student
-    Note: A OneToOne relation is established for each student with User model.
-    """
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    subject_major = models.CharField(name="subject_major", max_length=60)
 
      
