@@ -12,12 +12,7 @@ from rest_framework.permissions import IsAdminUser
 class UserRegistrationView(APIView):
     def get(self, request, format=None):
         user = User.objects.all()
-        # student = Student.objects.all()
-        # course = Course.objects.all()
         one = UserRegistrationSerializer(user, many=True,context={'request': request})
-        # two = StudentSerializers(student, many=True,context={'request': request})
-        # three = CourseSerializers(course, many=True,context={'request': request})
-        # comb = one.data + two.data + three.data
         return Response(one.data, status=status.HTTP_201_CREATED)
   
     def post(self, request, format=None):

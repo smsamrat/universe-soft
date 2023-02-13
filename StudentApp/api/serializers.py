@@ -8,11 +8,15 @@ from UserApp.models import User
 
   
 class StudentSerializers(serializers.ModelSerializer):
-    course = HyperlinkedIdentityField(view_name='course-detail')
+    course = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='name'
+    )
     class Meta:
         model = Student
         fields = ['student','course','net_fee','image','blood_group']
-
+    
 
 
 class CourseSerializers(serializers.ModelSerializer):
