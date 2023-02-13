@@ -8,16 +8,14 @@ from UserApp.models import User
 
   
 class StudentSerializers(serializers.ModelSerializer):
-    course = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field='name'
-    )
     class Meta:
         model = Student
         fields = ['student','course','net_fee','image','blood_group']
-    
-
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['course'] = {"name":instance.course.name,"duration":instance.course.duration}
+        return data
 
 class CourseSerializers(serializers.ModelSerializer):
     courseby = serializers.StringRelatedField(many=True,read_only=True)
@@ -27,7 +25,7 @@ class CourseSerializers(serializers.ModelSerializer):
        
 class UserRegistrationSerializer(serializers.ModelSerializer):
     
-    student_profile = StudentSerializers(required=True)
+    student_profile = StudentSerializers()
     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
     class Meta:
         model = User
@@ -46,8 +44,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validate_data):
         user_student = validate_data.pop('student_profile')
-        print(user_student)
-        user = User.objects.create(
+        user = User.objects.update_or_create(
             first_name = validate_data['first_name'],
             last_name = validate_data['last_name'],
             phone = validate_data['phone'],
@@ -56,8 +53,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         try:
             for uploaded_item in user_student:
-                print(uploaded_item)
-                Student.objects.create(
+                Student.objects.update_or_create(
                 student=user,
                 course = user_student['course'],
                 net_fee = user_student['net_fee'],
@@ -72,6 +68,35 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 blood_group = user_student['blood_group'],
             )
         return user
+    
+    # def update(self, instance, validated_data):
+    #     user_student = validated_data.pop('student_profile', None)
+        
+    #     user = User.objects.update_or_create(
+    #         first_name = validate_data['first_name'],
+    #         last_name = validate_data['last_name'],
+    #         phone = validate_data['phone'],
+    #         email = validate_data['email'],
+    #         password = validate_data['password'],
+    #     )
+    #     try:
+    #         for uploaded_item in user_student:
+    #             Student.objects.update_or_create(
+    #             student=user,
+    #             course = user_student['course'],
+    #             net_fee = user_student['net_fee'],
+    #             image = uploaded_item,
+    #             blood_group = user_student['blood_group'],
+    #             )
+    #     except:
+    #         Student.objects.update_or_create(
+    #             student=user,
+    #             course = user_student['course'],
+    #             net_fee = user_student['net_fee'],
+    #             blood_group = user_student['blood_group'],
+    #         )
+    #     return user
+    
     
     
 
