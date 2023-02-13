@@ -1,16 +1,29 @@
 from rest_framework import serializers
 
 from StudentApp.models import *
-from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from UserApp.models import User
 
 
+  
 class StudentSerializers(serializers.ModelSerializer):
+    course = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='name'
+    )
     class Meta:
         model = Student
-        fields = '__all__'
+        fields = ['student','course','net_fee','image','blood_group']
+    
+
+
+class CourseSerializers(serializers.ModelSerializer):
+    courseby = serializers.StringRelatedField(many=True,read_only=True)
+    class Meta:
+        model = Course
+        fields = ['name','duration','courseby']
        
 class UserRegistrationSerializer(serializers.ModelSerializer):
     
@@ -33,6 +46,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validate_data):
         user_student = validate_data.pop('student_profile')
+        print(user_student)
         user = User.objects.create(
             first_name = validate_data['first_name'],
             last_name = validate_data['last_name'],
@@ -40,13 +54,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             email = validate_data['email'],
             password = validate_data['password'],
         )
-        Student.objects.update_or_create(
-            student=user,
-            net_fee = user_student['net_fee']
-        )
+        try:
+            for uploaded_item in user_student:
+                print(uploaded_item)
+                Student.objects.create(
+                student=user,
+                course = user_student['course'],
+                net_fee = user_student['net_fee'],
+                image = uploaded_item,
+                blood_group = user_student['blood_group'],
+                )
+        except:
+            Student.objects.update_or_create(
+                student=user,
+                course = user_student['course'],
+                net_fee = user_student['net_fee'],
+                blood_group = user_student['blood_group'],
+            )
         return user
     
     
+
 
 
 
