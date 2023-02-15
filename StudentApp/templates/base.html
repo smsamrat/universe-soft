@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="https://crm-admin-dashboard-template.multipurposethemes.com/images/favicon.ico">
+
+    <title>Accounts - Dashboard</title>
+
+    <!-- Vendors Style-->
+    <link rel="stylesheet" href="{% static 'css/vendors_css.css' %}">
+
+    <!-- Style-->
+    <link rel="stylesheet" href="{% static 'css/horizontal-menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin_color.css' %}">
+
+</head>
+
+<body class="layout-top-nav light-skin theme-primary fixed">
+
+    <div class="wrapper">
+
+        <!-- header section -->
+        {% include 'common_feature/header.html' %}
+
+        <!-- navbar section -->
+        {% include 'common_feature/navbar.html' %}
+
+
+        <!-- Content wrapper -->
+        {% block content %}
+        
+        {% endblock content %}
+        <!-- /.content-wrapper -->
+
+        <!-- Side panel -->
+        {% include 'common_feature/footer.html' %}
+
+
+        <!-- quick_actions_toggle -->
+        {% include 'common_feature/quick_actions_toggle.html' %}
+        <!-- /quick_actions_toggle -->
+
+        <!-- quick_panel_toggle -->
+        {% include 'common_feature/quick_panel_toggle.html' %}
+        <!-- /quick_panel_toggle -->
+
+        <!-- quick_shop_toggle -->
+        {% include 'common_feature/quick_shop_toggle.html' %}
+        <!-- /quick_shop_toggle -->
+
+    </div>
+    <!-- ./wrapper -->
+
+    
+    {% include 'common_feature/side_demo_panel.html' %}
+    <!-- ./side demo panel -->
+
+
+    {% include 'common_feature/sidebar.html' %}
+    <!-- Sidebar -->
+
+    {% include 'common_feature/page_content_overlay.html' %}
+    <!-- Page Content overlay -->
+
+
+    <!-- Vendor JS -->
+    <script src="{% static 'js/vendors.min.js' %}"></script>
+    <script src="{% static 'js/pages/chat-popup.js' %}"></script>
+    <script src="{% static 'assets/icons/feather-icons/feather.min.js' %}"></script>
+
+    <script src="{% static 'assets/vendor_components/apexcharts-bundle/dist/apexcharts.js' %}"></script>
+
+    <!-- CRMi App -->
+    <script src="{% static 'js/jquery.smartmenus.js' %}"></script>
+    <script src="{% static 'js/menus.js' %}"></script>
+    <script src="{% static 'js/template.js' %}"></script>
+    <script src="{% static 'js/pages/dashboard.js' %}"></script>
+
+</body>
+</html>
